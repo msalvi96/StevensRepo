@@ -124,12 +124,6 @@ class Students:
         
         return [self.cwid, self.name, self.major, sorted(list(self.courses)), self.remaining_required, self.remaining_electives]
 
-    def __str__(self):
-        """ Dunder string method to display student summary """
-
-        return f"Name: {self.name} Major: {self.major}"
-
-
 class Instructors:
     """ Instructor class to initialise instructor information, add courses taught and display instructor information """
 
@@ -157,11 +151,6 @@ class Instructors:
                 new_list.append([self.cwid, self.name, self.department, key, value])
 
         return new_list
-
-    def __str__(self):
-        """ Dunder string method to display instructor information """
-
-        return f"Name: {self.name} Department: {self.department}"
 
 def file_reader(path, fields, seperator = ',', header = False):
     """ File Reader Function to clean a field separated file """
