@@ -1,7 +1,7 @@
 """
 Author: @MrunalSalvi
-SSW 810 - Homework 09 
-Date: April 3, 2019 
+SSW 810 - Homework 10
+Date: April 10, 2019 
 
 """
 
@@ -19,8 +19,10 @@ class University:
         os.chdir(self.directory)
         self.student = dict()
         self.instructor = dict()
+        self.majors = defaultdict(lambda: defaultdict(list))
         self.student_sum = PrettyTable()
         self.instructor_sum = PrettyTable()
+        self.majors_sum = PrettyTable()
 
         if not os.path.exists(self.directory):
             raise FileNotFoundError
@@ -39,17 +41,23 @@ class University:
         file3 = 'grades.txt'
         path3 = os.path.join(cwd, file3)
         for cwid, course_name, grades, instructor_cwid in file_reader(path3, fields=4, seperator='\t'):
-            for key, value in self.student.items():
-                if key == cwid:
+            for key1, value1 in self.student.items():
+                if key1 == cwid:
                     self.student[cwid].add_course(course_name, grades)
 
-            for key1, value1 in self.instructor.items():
-                if key1 == instructor_cwid:
+            for key2, value2 in self.instructor.items():
+                if key2 == instructor_cwid:
                     self.instructor[instructor_cwid].course_taught(course_name)
+
+        file4 = 'majors.txt'
+        path4 = os.path.join(cwd, file4)
+        for major, flag, course in file_reader(path4, fields=3, seperator='\t'):
+            self.majors[major][flag].append(course)
 
         if pt:
             self.student_sum.field_names = Students.fields
             for studs in self.student.values():
+                studs.update_course(self.majors)
                 self.student_sum.add_row(studs.pt_row())
 
             self.instructor_sum.field_names = Instructors.fields
@@ -57,8 +65,13 @@ class University:
                 for i in inst.pt_row():
                     self.instructor_sum.add_row(i)
             
-            print(f"Student Summary: \n {self.student_sum}")
-            print(f"Instructor Summary: \n {self.instructor_sum}")
+            self.majors_sum.add_column("Department", [dept for dept in self.majors.keys()])
+            self.majors_sum.add_column("Required", [i['R'] for i in self.majors.values()])
+            self.majors_sum.add_column("Electives", [i['E'] for i in self.majors.values()])
+
+            print(f"Majors Summary: \n{self.majors_sum}")
+            print(f"Student Summary: \n{self.student_sum}")
+            print(f"Instructor Summary: \n{self.instructor_sum}")
 
     def add_student(self, cwid, name, major):
         """ Class method to add a student into the univeristy repository """
@@ -73,7 +86,7 @@ class University:
 class Students:
     """ Student Class to initialize student information, add courses and display student information """
 
-    fields = ["CWID", "Name", "Courses"]
+    fields = ["CWID", "Name", "Major", "Courses", "Remaining Required", "Remaining Electives"]
 
     def __init__(self, cwid, name, major):
         """ Initialise student as object with name, major, and courses as attributes """
@@ -82,20 +95,34 @@ class Students:
         self.name = name
         self.major = major
         self.courses = defaultdict(str)
+        self.remaining_required = list()
+        self.remaining_electives = list()
 
     def add_course(self, subj, *grade):
         """ Class method to add a course and grade """
 
-        if grade:
-            self.courses[subj] = grade[0]
+        valid_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']
+        {self.courses[subj]: i for i in grade if i in valid_grades}
 
-        else:
-            self.courses[subj]
+    def update_course(self, majors):
+        """ Class method to update student program requirements """
 
+        for i in majors[self.major]['R']: #required_courses
+            if i not in self.courses:
+                self.remaining_required.append(i)
+
+        for j in majors[self.major]['E']: #elective_courses
+            if j in self.courses:
+                self.remaining_electives = None
+                break
+
+            else:
+                self.remaining_electives.append(j)
+    
     def pt_row(self):
         """ Class method for Pretty Table """
         
-        return [self.cwid, self.name, sorted(list(self.courses))]
+        return [self.cwid, self.name, self.major, sorted(list(self.courses)), self.remaining_required, self.remaining_electives]
 
     def __str__(self):
         """ Dunder string method to display student summary """
@@ -110,6 +137,7 @@ class Instructors:
 
     def __init__(self, instructor_cwid, instructor_name, department):
         """ Initialise instructor as an object with instructor name, department and courses taught as attributes """
+        
         self.cwid = instructor_cwid
         self.name = instructor_name
         self.department = department
