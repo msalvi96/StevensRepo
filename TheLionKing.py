@@ -8,6 +8,7 @@ Date: April 10, 2019
 from collections import defaultdict
 from prettytable import PrettyTable
 import os
+import sqlite3
 
 class University:
     """ University Class to process and store student and instructor information """
@@ -23,6 +24,10 @@ class University:
         self.student_sum = PrettyTable()
         self.instructor_sum = PrettyTable()
         self.majors_sum = PrettyTable()
+
+        DB_FILE = r"C:\Users\mruna\Desktop\StevensRepo\Stevens.db"
+
+        db = sqlite3.connect(DB_FILE)
 
         if not os.path.exists(self.directory):
             raise FileNotFoundError
@@ -60,10 +65,14 @@ class University:
                 studs.update_course(self.majors)
                 self.student_sum.add_row(studs.pt_row())
 
+            instructor_query = """ select i.CWID, i.Name, i.Dept, g.Course, count(*) as cnt
+                        from instructor_table i
+                        join grade_table g on i.CWID=g.Instructor_CWID
+                        group by g.Course order by i.CWID DESC """
+            
             self.instructor_sum.field_names = Instructors.fields
-            for inst in self.instructor.values():
-                for i in inst.pt_row():
-                    self.instructor_sum.add_row(i)
+            for row in db.execute(instructor_query):
+                self.instructor_sum.add_row(list(row))
             
             self.majors_sum.add_column("Department", [dept for dept in self.majors.keys()])
             self.majors_sum.add_column("Required", [i['R'] for i in self.majors.values()])
