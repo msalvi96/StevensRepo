@@ -1,7 +1,7 @@
 """
 Author: @MrunalSalvi
-SSW 810 - Homework 10
-Date: April 10, 2019 
+SSW 810
+Class definitions: University, Student, Instructor
 
 """
 
@@ -13,7 +13,7 @@ import sqlite3
 class University:
     """ University Class to process and store student and instructor information """
 
-    def __init__(self, directory, pt=True):
+    def __init__(self, directory, pt=False, web=True):
         """ Initialise university repository """
 
         self.directory = directory
@@ -24,15 +24,13 @@ class University:
         self.student_sum = PrettyTable()
         self.instructor_sum = PrettyTable()
         self.majors_sum = PrettyTable()
-
-        DB_FILE = r"C:\Users\mruna\Desktop\StevensRepo\Stevens.db"
-
-        db = sqlite3.connect(DB_FILE)
+        self.student_data = list()
+        self.instructor_data = list()
+        cwd = os.getcwd()
 
         if not os.path.exists(self.directory):
             raise FileNotFoundError
 
-        cwd = os.getcwd()
         file1 = 'students.txt'
         path1 = os.path.join(cwd, file1)
         for cwid, name, major in file_reader(path1, fields=3, seperator='\t'):
@@ -60,27 +58,44 @@ class University:
             self.majors[major][flag].append(course)
 
         if pt:
+            self.majors_sum.add_column("Department", [dept for dept in self.majors.keys()])
+            self.majors_sum.add_column("Required", [i['R'] for i in self.majors.values()])
+            self.majors_sum.add_column("Electives", [i['E'] for i in self.majors.values()])
+            
             self.student_sum.field_names = Students.fields
             for studs in self.student.values():
                 studs.update_course(self.majors)
                 self.student_sum.add_row(studs.pt_row())
 
-            instructor_query = """ select i.CWID, i.Name, i.Dept, g.Course, count(*) as cnt
-                        from instructor_table i
-                        join grade_table g on i.CWID=g.Instructor_CWID
-                        group by g.Course order by i.CWID DESC """
-            
             self.instructor_sum.field_names = Instructors.fields
-            for row in db.execute(instructor_query):
-                self.instructor_sum.add_row(list(row))
-            
-            self.majors_sum.add_column("Department", [dept for dept in self.majors.keys()])
-            self.majors_sum.add_column("Required", [i['R'] for i in self.majors.values()])
-            self.majors_sum.add_column("Electives", [i['E'] for i in self.majors.values()])
+            for inst in self.instructor.values():
+                for i in inst.pt_row():
+                    self.instructor_sum.add_row(i)
 
             print(f"Majors Summary: \n{self.majors_sum}")
             print(f"Student Summary: \n{self.student_sum}")
             print(f"Instructor Summary: \n{self.instructor_sum}")
+
+        if web:
+            DB_FILE = os.path.join(cwd, 'Stevens.db')
+            db = sqlite3.connect(DB_FILE)
+
+            student_query = """ select s.cwid, s.name, s.major, count(g.Course) as complete
+                        from student_table s join grade_table g on s.cwid=g.Student_CWID
+                        group by s.cwid, s.name, s.major """
+            
+            self.student_data = [{'cwid': cwid, 'name': name, 'major': major, 'complete': complete}
+                                for cwid, name, major, complete in db.execute(student_query)]
+
+            instructor_query = """ select i.CWID, i.Name, i.Dept, g.Course, count(*) as Students
+                        from instructor_table i
+                        join grade_table g on i.CWID=g.Instructor_CWID
+                        group by g.Course order by i.CWID ASC """
+            
+            self.instructor_data = [{'cwid': cwid, 'name': name, 'dept': dept, 'courses': courses, 'students': students}
+                                    for cwid, name, dept, courses, students in db.execute(instructor_query)]
+
+            db.close()
 
     def add_student(self, cwid, name, major):
         """ Class method to add a student into the univeristy repository """
@@ -187,8 +202,7 @@ def file_reader(path, fields, seperator = ',', header = False):
 def main():
     """ Main Function to interact with the user """
 
-    Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo\data_files')
-
+    Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo', web=False, pt=True)
 
 if __name__ == '__main__':
     main()

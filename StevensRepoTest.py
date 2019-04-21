@@ -17,15 +17,14 @@ class TestStevensRepo(unittest.TestCase):
     def test_university_init(self):
         """ Verify if __init__ method in  University class works properly """
 
-        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo\test_files', pt=False)
+        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo', web=True)
 
-        self.assertEqual(Columbia.directory, r'C:\Users\mruna\Desktop\StevensRepo\test_files')
+        self.assertEqual(Columbia.directory, r'C:\Users\mruna\Desktop\StevensRepo')
         self.assertEqual(type(Columbia.student), type(dict()))
         self.assertEqual(type(Columbia.instructor), type(dict()))
         self.assertEqual(type(Columbia.majors), type(defaultdict(lambda: defaultdict(list))))
-        self.assertEqual(type(Columbia.student_sum), type(PrettyTable()))
-        self.assertEqual(type(Columbia.instructor_sum), type(PrettyTable()))
-        self.assertEqual(type(Columbia.majors_sum), type(PrettyTable()))
+        self.assertEqual(type(Columbia.student_data), type(list()))
+        self.assertEqual(type(Columbia.instructor_data), type(list()))
 
         with self.assertRaises(FileNotFoundError):
             Rutgers = University(r'C:\Users\mruna\Desktop\Steve')
@@ -33,7 +32,7 @@ class TestStevensRepo(unittest.TestCase):
     def test_university_add_student(self):
         """ Verify if add_student method in University class works properly """
 
-        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo\test_files', pt=False) 
+        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo', pt=False) 
         Columbia.add_student('10440989', 'Mrunal, S', 'SFEN')
         Columbia.add_student('10445678', 'Aniruddha, P', 'CS')
         Columbia.add_student('10456789', 'Akash, D', 'MIS')
@@ -45,7 +44,7 @@ class TestStevensRepo(unittest.TestCase):
     def test_university_add_instructor(self):
         """ Verify if add_instructor method in University class works properly """
 
-        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo\test_files', pt=False)
+        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo', pt=False)
         Columbia.add_instructor('10440989', 'Mrunal, S', 'SFEN')
         Columbia.add_instructor('10445678', 'Aniruddha, P', 'CS')
         Columbia.add_instructor('10456789', 'Akash, D', 'MIS')
@@ -94,7 +93,7 @@ class TestStevensRepo(unittest.TestCase):
     def test_student_update_course(self):
         """ Verify if update_course method works properly """
 
-        Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo\test_files', pt=False)
+        Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo', pt=False)
         student = Students('10440989', 'Mrunal, S', 'SFEN')
         student.add_course('SSW 689','A')
         student.update_course(Stevens.majors)
@@ -108,7 +107,7 @@ class TestStevensRepo(unittest.TestCase):
     def test_student_pt_row(self):
         """ Verify if pt_row method works properly """
 
-        Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo\test_files', pt=False)
+        Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo', pt=False)
         student = Students('10440989', 'Mrunal, S', 'SFEN')
         student.add_course('SSW 689','A')
         student.update_course(Stevens.majors)
