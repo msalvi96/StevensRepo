@@ -17,14 +17,14 @@ class TestStevensRepo(unittest.TestCase):
     def test_university_init(self):
         """ Verify if __init__ method in  University class works properly """
 
-        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo', pt=False)
+        Columbia = University(r'C:\Users\mruna\Desktop\StevensRepo', web=True)
 
         self.assertEqual(Columbia.directory, r'C:\Users\mruna\Desktop\StevensRepo')
         self.assertEqual(type(Columbia.student), type(dict()))
         self.assertEqual(type(Columbia.instructor), type(dict()))
         self.assertEqual(type(Columbia.majors), type(defaultdict(lambda: defaultdict(list))))
-        self.assertEqual(Columbia.student_data, list())
-        self.assertEqual(Columbia.instructor_data, list())
+        self.assertEqual(type(Columbia.student_data), type(list()))
+        self.assertEqual(type(Columbia.instructor_data), type(list()))
 
         with self.assertRaises(FileNotFoundError):
             Rutgers = University(r'C:\Users\mruna\Desktop\Steve')
