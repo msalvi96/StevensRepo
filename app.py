@@ -2,7 +2,7 @@ import os
 from TheLionKing import University
 from flask import Flask, render_template
 
-Stevens = University(r'C:\Users\mruna\Desktop\StevensRepo', web=True, pt=False)
+Stevens = University(r'\\\\SERVER\\StevensRepo', web=True, pt=False)
 
 app = Flask(__name__)
 
