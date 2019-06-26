@@ -18,5 +18,6 @@ def student_courses():
 def instructor_courses():
     return render_template('instructors.html', title="Stevens Repository", table_title="Professor Summary", data=Stevens.instructor_data)
 
-app.run(debug=False)
+if __name__ == '__main__':
+    app.run(debug=False)
 
