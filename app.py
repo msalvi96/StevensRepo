@@ -2,7 +2,8 @@ import os
 from TheLionKing import University
 from flask import Flask, render_template
 
-Stevens = University(r'\\\\SERVER\\StevensRepo', web=True, pt=False)
+cwd = os.getcwd()
+Stevens = University(cwd , web=True, pt=False)
 
 app = Flask(__name__)
 
